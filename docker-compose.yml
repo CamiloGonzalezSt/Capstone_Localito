@@ -1,0 +1,53 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: localito-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: localito
+      POSTGRES_USER: localito
+      POSTGRES_PASSWORD: localito
+    ports:
+      - "5432:5432"
+    volumes:
+      - localito_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U localito -d localito"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: localito-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # Dentro de Docker la BD se llama "postgres", no "localhost"
+      DATABASE_URL: postgresql://localito:localito@postgres:5432/localito
+      API_HOST: 0.0.0.0
+      API_PORT: 3000
+      WEB_ORIGIN: http://localhost:5173
+      APP_URL: http://localhost:5173
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: localito-web
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - api
+
+volumes:
+  localito_pg_data:
