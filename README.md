@@ -255,6 +255,13 @@ El proyecto utiliza **npm workspaces** y se divide en:
 
 ## Puesta en marcha
 
+### Con Docker (recomendado para evaluación)
+
+1. Copiar variables: `cp .env.example .env`
+2. Levantar todo: `docker compose up --build`
+3. Web: http://localhost:5173 · API: http://localhost:3000/health
+4. Detener: `docker compose down`
+
 ### Instalación desde cero
 
 ```powershell
